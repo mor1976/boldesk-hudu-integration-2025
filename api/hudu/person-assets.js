@@ -11,32 +11,26 @@ export default async function handler(req, res) {
   try {
     const HUDU_API_KEY = process.env.HUDU_API_KEY;
     const HUDU_SUBDOMAIN = process.env.HUDU_SUBDOMAIN;
-
     const HUDU_BASE_URL = `https://${HUDU_SUBDOMAIN}.huducloud.com/api/v1`;
 
-    // Get the person's asset details first
-    const personResponse = await fetch(`${HUDU_BASE_URL}/assets/${personId}`, {
+    // Try to get all assets and filter by the person
+    const allAssetsResponse = await fetch(`${HUDU_BASE_URL}/assets`, {
       headers: { 'x-api-key': HUDU_API_KEY }
     });
 
-    if (!personResponse.ok) {
-      throw new Error(`Failed to get person: ${personResponse.status}`);
+    if (!allAssetsResponse.ok) {
+      throw new Error(`Failed to get assets: ${allAssetsResponse.status}`);
     }
 
-    const personData = await personResponse.json();
-    const asset = personData.asset;
+    const allAssetsData = await allAssetsResponse.json();
+    const assets = allAssetsData.assets || [];
 
-    // Check if there are related items
-    const relatedItems = asset.related_items || [];
-
-    res.json({ 
-      assets: relatedItems,
-      personName: asset.name,
-      totalAssets: relatedItems.length 
-    });
-
-  } catch (error) {
-    console.error('Error getting person assets:', error);
-    res.status(500).json({ error: error.message });
-  }
-}
+    // Find assets that might be related to this person
+    const relatedAssets = assets.filter(asset => {
+      // Check if the asset mentions the person in any field
+      if (asset.fields) {
+        return asset.fields.some(field => 
+          field.value && field.value.toString().includes('ronit')
+        );
+      }
+      return false;
