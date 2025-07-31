@@ -1,0 +1,8 @@
+{
+  "name": "boldesk-hudu-integration",
+  "version": "1.0.0",
+  "description": "BoldDesk Custom App for Hudu Asset Lookup",
+  "scripts": {
+    "build": "echo 'Build complete'"
+  }
+}
