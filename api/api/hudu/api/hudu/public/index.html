@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BoldDesk-Hudu Integration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1 { color: #007cba; margin-bottom: 20px; }
+        .status { 
+            padding: 15px; 
+            border-radius: 5px; 
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .loading { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 10px;
+        }
+        button:hover { background: #005a87; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        input[type="email"] {
+            padding: 10px;
+            width: 300px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 BoldDesk-Hudu Integration</h1>
+        <p>ממשק לבדיקת אינטגרציה בין BoldDesk ל-Hudu</p>
+        
+        <div class="test-section">
+            <h3>בדיקת חיבור</h3>
+            <button onclick="testConnection()">בדוק חיבור ל-Hudu</button>
+            <div id="connectionResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>חיפוש אדם</h3>
+            <input type="email" id="emailInput" placeholder="הכנס כתובת אימייל">
+            <br>
+            <button onclick="searchPerson()">חפש אדם</button>
+            <div id="searchResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>נכסים מקושרים</h3>
+            <button onclick="getAssets()" id="assetsBtn" disabled>הצג נכסים מקושרים</button>
+            <div id="assetsResult"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentPersonId = null;
+
+        async function testConnection() {
+            const resultDiv = document.getElementById('connectionResult');
+            resultDiv.innerHTML = '<div class="loading">בודק חיבור...</div>';
+
+            try {
+                const response = await fetch('/api/test');
+                const data = await response.json();
+
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            ✅ החיבור הצליח!<br>
+                            נמצאו ${data.totalLayouts} Asset Layouts<br>
+                            People Layout: ${data.peopleLayoutFound ? '✅ נמצא' : '❌ לא נמצא'}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="
