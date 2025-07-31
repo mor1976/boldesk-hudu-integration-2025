@@ -1,0 +1,12 @@
+{
+  "name": "boldesk-hudu-integration",
+  "version": "1.0.0",
+  "description": "BoldDesk Custom App for Hudu Asset Lookup",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'Build complete'"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
