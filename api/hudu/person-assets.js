@@ -14,38 +14,29 @@ export default async function handler(req, res) {
 
     const HUDU_BASE_URL = `https://${HUDU_SUBDOMAIN}.huducloud.com/api/v1`;
 
-    // Get relations
-    const relationsResponse = await fetch(`${HUDU_BASE_URL}/assets/${personId}/relations`, {
+    // Get the person's asset details first
+    const personResponse = await fetch(`${HUDU_BASE_URL}/assets/${personId}`, {
       headers: { 'x-api-key': HUDU_API_KEY }
     });
-    const relationsData = await relationsResponse.json();
-    const relations = relationsData.relations || [];
 
-    // Get asset details
-    const assetPromises = relations.map(async (relation) => {
-      try {
-        const assetResponse = await fetch(`${HUDU_BASE_URL}/assets/${relation.toable_id}`, {
-          headers: { 'x-api-key': HUDU_API_KEY }
-        });
-        if (assetResponse.ok) {
-          const assetData = await assetResponse.json();
-          return {
-            ...assetData.asset,
-            url: `https://${HUDU_SUBDOMAIN}.huducloud.com/a/assets/${relation.toable_id}`
-          };
-        }
-        return null;
-      } catch (err) {
-        return null;
-      }
+    if (!personResponse.ok) {
+      throw new Error(`Failed to get person: ${personResponse.status}`);
+    }
+
+    const personData = await personResponse.json();
+    const asset = personData.asset;
+
+    // Check if there are related items
+    const relatedItems = asset.related_items || [];
+
+    res.json({ 
+      assets: relatedItems,
+      personName: asset.name,
+      totalAssets: relatedItems.length 
     });
 
-    const assets = await Promise.all(assetPromises);
-    const validAssets = assets.filter(asset => asset !== null);
-
-    res.json({ assets: validAssets });
-
   } catch (error) {
+    console.error('Error getting person assets:', error);
     res.status(500).json({ error: error.message });
   }
 }
