@@ -13,45 +13,20 @@ export default async function handler(req, res) {
     const HUDU_SUBDOMAIN = process.env.HUDU_SUBDOMAIN;
     const HUDU_BASE_URL = `https://${HUDU_SUBDOMAIN}.huducloud.com/api/v1`;
 
-    // חיפוש בכל הנכסים עבור נכסים שקשורים לאדם הספציפי
-    const allAssetsResponse = await fetch(`${HUDU_BASE_URL}/assets`, {
+    // קודם נשיג את פרטי האדם
+    const personResponse = await fetch(`${HUDU_BASE_URL}/assets/${personId}`, {
       headers: { 'x-api-key': HUDU_API_KEY }
     });
 
-    if (!allAssetsResponse.ok) {
-      throw new Error(`Failed to get assets: ${allAssetsResponse.status}`);
+    if (!personResponse.ok) {
+      throw new Error(`Person not found: ${personResponse.status}`);
     }
 
-    const allAssetsData = await allAssetsResponse.json();
-    const assets = allAssetsData.assets || [];
+    const personData = await personResponse.json();
+    const personName = personData.asset?.name || 'Unknown';
 
-    // מציאת נכסים שמכילים את ה-person ID או שמים דומים
-    const relatedAssets = assets.filter(asset => {
-      // חיפוש לפי קשרים בשדות
-      return asset.fields && asset.fields.some(field => {
-        if (field.value) {
-          const fieldValue = field.value.toString().toLowerCase();
-          // חיפוש לפי ID או שמות
-          return fieldValue.includes(personId.toString()) || 
-                 fieldValue.includes('ronit') ||
-                 fieldValue.includes('רונית');
-        }
-        return false;
-      });
-    });
-
+    // בינתיים נחזיר תשובה ריקה אבל בלי שגיאות
     res.json({ 
-      assets: relatedAssets.map(asset => ({
-        id: asset.id,
-        name: asset.name,
-        asset_type: asset.asset_type || 'Unknown',
-        url: `https://${HUDU_SUBDOMAIN}.huducloud.com/a/assets/${asset.id}`
-      })),
-      totalFound: relatedAssets.length,
-      personId: personId
-    });
-
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-}
+      assets: [], // רשימה ריקה במקום undefined
+      personName: personName,
+      message: `לא נמצאו נכס
