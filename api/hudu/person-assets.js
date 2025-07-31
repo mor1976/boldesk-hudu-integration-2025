@@ -9,38 +9,25 @@ export default async function handler(req, res) {
   }
 
   try {
-    const HUDU_API_KEY = process.env.HUDU_API_KEY;
-    const HUDU_SUBDOMAIN = process.env.HUDU_SUBDOMAIN;
-    const HUDU_BASE_URL = `https://${HUDU_SUBDOMAIN}.huducloud.com/api/v1`;
-
-    // Get the specific person's details
-    const personResponse = await fetch(`${HUDU_BASE_URL}/assets/${personId}`, {
-      headers: { 'x-api-key': HUDU_API_KEY }
-    });
-
-    if (!personResponse.ok) {
-      return res.status(500).json({ 
-        error: `Person API failed: ${personResponse.status}`,
-        personId: personId 
-      });
-    }
-
-    const personData = await personResponse.json();
-    
-    // Return debug info to see the structure
+    // בינתיים נחזיר תשובה בסיסית
     res.json({ 
-      debug: true,
-      personId: personId,
-      personName: personData.asset?.name,
-      fullResponse: personData,
-      hasRelatedItems: !!personData.asset?.related_items,
-      relatedItemsCount: personData.asset?.related_items?.length || 0
+      assets: [
+        {
+          id: "123",
+          name: "מחשב של רונית",
+          asset_type: "Computer Asset",
+          url: "https://get-mor.huducloud.com/a/assets/123"
+        },
+        {
+          id: "456", 
+          name: "Email 365 של רונית",
+          asset_type: "Email",
+          url: "https://get-mor.huducloud.com/a/assets/456"
+        }
+      ]
     });
 
   } catch (error) {
-    res.status(500).json({ 
-      error: error.message,
-      personId: personId 
-    });
+    res.status(500).json({ error: error.message });
   }
 }
