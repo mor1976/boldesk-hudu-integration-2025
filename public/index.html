@@ -1,29 +1,59 @@
-async function getAssets() {
-    document.getElementById('assetsResult').innerHTML = '<div class="loading">מחפש נכסים...</div>';
-    try {
-        const response = await fetch('/api/hudu/person-assets', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ personId: currentPersonId })
-        });
-        const data = await response.json();
-        
-        // בדיקה בטוחה של המערך
-        const assets = data.assets || [];
-        
-        if (assets.length > 0) {
-            const html = assets.map(asset => `
-                <div style="background: #e3f2fd; padding: 10px; margin: 5px;">
-                    <strong>${asset.name || 'שם לא ידוע'}</strong><br>
-                    סוג: ${asset.asset_type || 'לא צוין'}<br>
-                    <a href="${asset.url}" target="_blank">פתח</a>
-                </div>
-            `).join('');
-            document.getElementById('assetsResult').innerHTML = `<div class="success">✅ ${assets.length} נכסים: ${html}</div>`;
-        } else {
-            document.getElementById('assetsResult').innerHTML = '<div class="success">ℹ️ לא נמצאו נכסים מקושרים</div>';
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BoldDesk-Hudu Integration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
         }
-    } catch (error) {
-        document.getElementById('assetsResult').innerHTML = `<div class="error">❌ שגיאה: ${error.message}</div>`;
-    }
-}
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1 { color: #007cba; }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        button:hover { background: #005a87; }
+        button:disabled { background: #ccc; }
+        input[type="email"] {
+            padding: 10px;
+            width: 300px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .result {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .loading { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>
